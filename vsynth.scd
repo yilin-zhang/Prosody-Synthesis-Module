@@ -55,20 +55,11 @@ SynthDef(\vsynth,{
 ~notes = Array.fill(128, {nil});
 ~notes.postcs;
 
-~slider_size = [30, 150];
-~slider_y = 50; // the y-axis position
-~knob_size = 30;
-~txt_y = 30;
-
-~osc1_val = 0;
-~osc2_val = 0;
-~tune_val = 0;
-~vib_val = 0;
-~brightness_val = 0;
-~noise_val = 0;
-
-~valence = 0;
-~power = 0;
+// GUI
+//~slider_size = [30, 150];
+//~slider_y = 50; // the y-axis position
+//~knob_size = 30;
+//~txt_y = 30;
 
 ~formants = [
 	[675, 1550], // a (650~700), (1510~1590)
@@ -77,61 +68,46 @@ SynthDef(\vsynth,{
 ];
 
 ~control_ranges = [
-//	[25, 40],
-//	[40, 50],
-//	[40, 30]
 	[75, 150],
 	[120, 150],
 	[90, 70]
 ];
+
+// Oscillators
+~osc1_val = 0.8;
+~osc2_val = 0.8;
+
+// CC
+~vowel1_val = 0;                     // CC0
+~vowel1_f1_val = ~formants[0][0];    // CC1
+~vowel1_f2_val = ~formants[0][1];    // CC2
+~vowel2_val = 1;                     // CC3
+~vowel2_f1_val = ~formants[1][0];    // CC4
+~vowel2_f2_val = ~formants[1][1];    // CC5
+~tune_val = 0;                       // CC6
+~vib_val = 0;                        // CC7
+~brightness_val = 0;                 // CC8
+~noise_val = 0;                      // CC9
+
+
 )
+
 ///////////////////////////////////////////////////////////
 // MIDI controls
 (
 MIDIIn.connectAll; // connect all MIDI devices to SC (will run .init automatically)
 
-MIDIFunc.trace(true); // print all the MIDI information
+MIDIFunc.trace(false); // print all the MIDI information
 
 MIDIdef.noteOn(\on, {
 	arg val, num, chan, src;
 	// calculate the formants based on valence&power
-	var vowel1 = [0, 1, 2].choose;
-	var range1 = ~control_ranges[vowel1];
-	var vowel1_f1 = ~formants[vowel1][0];
-	var vowel1_f2 = ~formants[vowel1][1];
-
-	var vowel2 = [0, 1, 2].choose;
-	var range2 = ~control_ranges[vowel2];
-	var vowel2_f1 = ~formants[vowel2][0];
-	var vowel2_f2 = ~formants[vowel2][1];
-
-	if (vowel1 == 0) { // a
-		vowel1_f1 = vowel1_f1 + (range1[0] * ((0.3*~valence) + (0.7*~power)));
-		vowel1_f2 = vowel1_f2 + (range1[1] * ((0.9*~valence) + (0.1*~power)));
-	};
-	if (vowel1 == 1) { // i
-		vowel1_f1 = vowel1_f1 + (range1[0] * ((-0.3*~valence) + (0.7*~power)));
-		vowel1_f2 = vowel1_f2 + (range1[1] * ((0.7*~valence) + (0.3*~power)));
-	};
-	if (vowel1 == 2) { // u
-		vowel1_f1 = vowel1_f1 + (range1[0] * ((0.4*~valence) + (-0.6*~power)));
-		vowel1_f2 = vowel1_f2 + (range1[1] * ((0.3*~valence) + (-0.7*~power)));
-	};
-
-	if (vowel2 == 0) { // a
-		vowel2_f1 = vowel2_f1 + (range2[0] * ((0.3*~valence) + (0.7*~power)));
-		vowel2_f2 = vowel2_f2 + (range2[1] * ((0.9*~valence) + (0.1*~power)));
-	};
-	if (vowel2 == 1) { // i
-		vowel2_f1 = vowel2_f1 + (range2[0] * ((-0.3*~valence) + (0.7*~power)));
-		vowel2_f2 = vowel2_f2 + (range2[1] * ((0.7*~valence) + (0.3*~power)));
-	};
-	if (vowel2 == 2) { // u
-		vowel2_f1 = vowel2_f1 + (range2[0] * ((0.4*~valence) + (0.6*~power)));
-		vowel1_f2 = vowel2_f2 + (range2[1] * ((0.3*~valence) + (-0.7*~power)));
-	};
 
 	//{~sl2d_fm.valueAction_(~fm_val)}.defer;
+	~vowel1_f1_val.postln;
+	~vowel1_f2_val.postln;
+	~vowel2_f1_val.postln;
+	~vowel2_f2_val.postln;
 	~notes[num] = Synth.new(\vsynth, [
 		\freq, num.midicps,
 		\amp, val.linexp(1, 127, 0.05, 1), // volume control
@@ -142,10 +118,10 @@ MIDIdef.noteOn(\on, {
 		\brightness, ~brightness_val,
 		\osc1_amp, ~osc1_val,
 		\osc2_amp, ~osc2_val,
-		\vowel1_f1, vowel1_f1,
-		\vowel1_f2, vowel1_f2,
-		\vowel2_f1, vowel2_f1,
-		\vowel2_f2, vowel2_f2,
+		\vowel1_f1, ~vowel1_f1_val,
+		\vowel1_f2, ~vowel1_f2_val,
+		\vowel2_f1, ~vowel2_f1_val,
+		\vowel2_f2, ~vowel2_f2_val,
 	]);
 });
 
@@ -156,41 +132,93 @@ MIDIdef.noteOff(\off, {
 	~notes[num] = nil; // remove the synth from the array, since the synth has been freed
 });
 
-MIDIdef.cc(\cc_valence, {
+MIDIdef.cc(\cc_vowel1, {
 	arg val, num, chan;
-	{~sl2d_fm.activex_(val/127)}.defer;
+	~vowel1_val = val;
+	//{~sl2d_fm.activex_(val/127)}.defer;
 }, 0);
 
-MIDIdef.cc(\cc_power, {
+MIDIdef.cc(\cc_vowel1_f1, {
 	arg val, num, chan;
-	{~sl2d_fm.activey_(val/127)}.defer;
+	~vowel1_f1_val = switch(~vowel1_val,
+		{0}, {~control_ranges[0][0] * (val / 127 - 0.5) * 2 + ~formants[0][0]},
+		{1}, {~control_ranges[1][0] * (val / 127 - 0.5) * 2 + ~formants[1][0]},
+		{2}, {~control_ranges[2][0] * (val / 127 - 0.5) * 2 + ~formants[2][0]},
+	);
+	//{~sl2d_fm.activex_(val/127)}.defer;
 }, 1);
+
+MIDIdef.cc(\cc_vowel1_f2, {
+	arg val, num, chan;
+	~vowel1_f2_val = switch(~vowel1_val,
+		{0}, {~control_ranges[0][1] * (val / 127 - 0.5) * 2 + ~formants[0][1]},
+		{1}, {~control_ranges[1][1] * (val / 127 - 0.5) * 2 + ~formants[1][1]},
+		{2}, {~control_ranges[2][1] * (val / 127 - 0.5) * 2 + ~formants[2][1]},
+	);
+	//{~sl2d_fm.activex_(val/127)}.defer;
+}, 2);
+
+MIDIdef.cc(\cc_vowel2, {
+	arg val, num, chan;
+	~vowel2_val = val;
+
+	//{~sl2d_fm.activex_(val/127)}.defer;
+}, 3);
+
+MIDIdef.cc(\cc_vowel2_f1, {
+	arg val, num, chan;
+	~vowel2_f1_val = switch(~vowel2_val,
+		{0}, {~control_ranges[0][0] * (val / 127 - 0.5) * 2 + ~formants[0][0]},
+		{1}, {~control_ranges[1][0] * (val / 127 - 0.5) * 2 + ~formants[1][0]},
+		{2}, {~control_ranges[2][0] * (val / 127 - 0.5) * 2 + ~formants[2][0]},
+	);
+	//{~sl2d_fm.activex_(val/127)}.defer;
+}, 4);
+
+MIDIdef.cc(\cc_vowel2_f2, {
+	arg val, num, chan;
+	~vowel2_f2_val = switch(~vowel2_val,
+		{0}, {~control_ranges[0][1] * (val / 127 - 0.5) * 2 + ~formants[0][1]},
+		{1}, {~control_ranges[1][1] * (val / 127 - 0.5) * 2 + ~formants[1][1]},
+		{2}, {~control_ranges[2][1] * (val / 127 - 0.5) * 2 + ~formants[2][1]},
+	);
+	//{~sl2d_fm.activex_(val/127)}.defer;
+}, 5);
 
 MIDIdef.cc(\cc_tune, {
 	arg val, num, chan;
-	{~kb_tune.valueAction_(val/128)}.defer; // 64 -> no tune
-}, 2);
+	~tune_val = val/127;
+	~notes.do{|note| note.set(\tune, ~tune_val)};
+	//{~kb_tune.valueAction_(val/128)}.defer; // 64 -> no tune
+}, 6);
 
 MIDIdef.cc(\cc_vib, {
 	arg val, num, chan;
-	{~kb_vib.valueAction_(val/127)}.defer;
-}, 3);
+	~vib_val = val/127;
+	~notes.do{|note| note.set(\vib, ~vib_val)};
+	//{~kb_vib.valueAction_(val/127)}.defer;
+}, 7);
 
 MIDIdef.cc(\cc_brightness, {
 	arg val, num, chan;
-	{~kb_brightness.valueAction_(val/127)}.defer;
-}, 4);
+	~brightness_val = val/127;
+	~notes.do{|note| note.set(\brightness, ~brightness_val)};
+	//{~kb_brightness.valueAction_(val/127)}.defer;
+}, 8);
 
 MIDIdef.cc(\cc_noise, {
 	arg val, num, chan;
-	{~kb_noise.valueAction_(val/127)}.defer;
-}, 5);
+	~noise_val = val/127;
+	~notes.do{|note| note.set(\noise, ~noise_val)};
+	//{~kb_noise.valueAction_(val/127)}.defer;
+}, 9);
 
 
 )
 
 ///////////////////////////////////////////////////////////
 // Build GUI elements
+/*
 (
 // w.close;
 w = Window.new("VSynth", Rect(500, 200, 350, 400));
@@ -271,3 +299,4 @@ w.front;
 });
 
 )
+*/

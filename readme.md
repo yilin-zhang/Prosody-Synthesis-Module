@@ -18,7 +18,7 @@ python watch_dir.py path/to/dir
 
 Vocal synthesis module. Use SuperCollider to set up (run all the code).
 
-Control Parameter:
+Control Parameters:
 - CC0 Valence
 - CC1 Power
 - CC2 Tune (microtone control, +- 100 cents, value 64 -> 0 cent)
