@@ -25,7 +25,7 @@ SynthDef(\vsynth,{
 	freq = Lag.kr(freq, 0.1);
 	vib = Lag.kr(vib, 0.1);
 	// vibrato = ((freq.cpsmidi)+(Line.kr(0.0,vib,2.5)*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
-	vibrato = ((freq.cpsmidi+((tune-0.5)*2))+(vib*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
+	vibrato = ((freq.cpsmidi+tune)+(vib*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
 	src = Pulse.ar(vibrato, mul: osc1_amp*0.5) + Saw.ar(vibrato, mul: osc2_amp*0.5);
 
 	// formant settings
@@ -142,6 +142,42 @@ OSCdef.new(\note_velocity, {
 	arg msg, time, addr, port;
 	~velocity = msg[1].asInt;
 }, '/vsynth/note/velocity');
+
+OSCdef.new(\vibrato, {
+	arg msg, time, addr, port;
+	~vib_val = msg[1].asFloat;
+}, '/vsynth/feature/vibrato');
+
+OSCdef.new(\noiseness, {
+	arg msg, time, addr, port;
+	~noise_val = msg[1].asFloat;
+}, '/vsynth/feature/noiseness');
+
+OSCdef.new(\brightness, {
+	arg msg, time, addr, port;
+	~brightness_val = msg[1].asFloat;
+}, '/vsynth/feature/brightness');
+
+OSCdef.new(\v1_f1, {
+	arg msg, time, addr, port;
+	~vowel1_f1_val = msg[1].asFloat;
+}, '/vsynth/formant/vowel1/f1');
+
+OSCdef.new(\v1_f2, {
+	arg msg, time, addr, port;
+	~vowel1_f2_val = msg[1].asFloat;
+}, '/vsynth/formant/vowel1/f2');
+
+OSCdef.new(\v2_f1, {
+	arg msg, time, addr, port;
+	~vowel2_f1_val = msg[1].asFloat;
+}, '/vsynth/formant/vowel2/f1');
+
+OSCdef.new(\v2_f2, {
+	arg msg, time, addr, port;
+	~vowel2_f2_val = msg[1].asFloat;
+}, '/vsynth/formant/vowel2/f2');
+
 )
 NetAddr.langPort;
 "1".asInt + 1;

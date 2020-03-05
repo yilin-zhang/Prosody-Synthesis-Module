@@ -1,6 +1,7 @@
 import random
 from typing import List, Tuple, Dict
 from mido.messages.messages import Message
+# from osc_transmitter import OscTransmitter
 
 
 class ParamMapper():
@@ -13,19 +14,33 @@ class ParamMapper():
         'noiseness': (0, 1)
     }
 
+    OUPUT_PARAMS = ('vowel1_f1', 'vowel1_f2', 'vowel2_f1', 'vowel2_f2', 'tune',
+                    'vibrato', 'brightness', 'noiseness')
+
     def __init__(self):
         self._param_values = dict.fromkeys(ParamMapper.PARAM_RANGES, 0.)
 
-    def update_param(self, param: str, value: float):
+    def update_param(self, param, value):
+        ''' Update the parameter, and return a dict of the updated outputs
+        Args:
+        - param: the parameter
+        - value: the value of the parameter
+        Return:
+        - a dict of updated output
+        '''
         if not (value >= ParamMapper.PARAM_RANGES[param][0]
                 and value <= ParamMapper.PARAM_RANGES[param][1]):
             return
         self._param_values[param] = value
+        if param in ('valence', 'power'):
+            return self._map_formants()
+        else:
+            return {param: self._param_values[param]}
 
     def get_param(self, param: str) -> float:
         return self._param_values[param]
 
-    def get_formants(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+    def _map_formants(self):
         formant_control_params = {
             'a': {
                 'f1': 675,  # in Hz
@@ -72,9 +87,14 @@ class ParamMapper():
         # randomly picking vowels
         vowels = formant_control_params.keys()
         vowel1, vowel2 = random.sample(vowels, 2)
-        vowel1_freqs = map_vowel(vowel1, self._param_values['valence'],
-                                 self._param_values['power'])
-        vowel2_freqs = map_vowel(vowel2, self._param_values['valence'],
-                                 self._param_values['power'])
+        vowel1_f1, vowel1_f2 = map_vowel(vowel1, self._param_values['valence'],
+                                         self._param_values['power'])
+        vowel2_f1, vowel2_f2 = map_vowel(vowel2, self._param_values['valence'],
+                                         self._param_values['power'])
 
-        return vowel1_freqs, vowel2_freqs
+        return {
+            'vowel1_f1': vowel1_f1,
+            'vowel1_f2': vowel1_f2,
+            'vowel2_f1': vowel2_f1,
+            'vowel2_f2': vowel2_f2
+        }
