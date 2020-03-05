@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+import socket
 from watchgod import watch
 import mido
 
@@ -30,10 +31,12 @@ def send_midi_msg(midi_path: str, cc_mapper: CCMapper):
 
 
 def watch_dir(dir_path: str, cc_mapper: CCMapper):
-    ''' Watches a directory, and send midi messages whenever a new MIDI file is created in it.
+    ''' Watches a directory, and send midi messages whenever a new MIDI file
+    is created in it.
     Arg:
     - dir_path: path to the direcory to be watched
     '''
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     for changes in watch(dir_path):
         for change in changes:
             status, path = change
@@ -42,6 +45,7 @@ def watch_dir(dir_path: str, cc_mapper: CCMapper):
                 continue
             elif status.name == 'added' and path.endswith('.mid'):
                 print('new midi message')
+                sock.sendto(bytes('h', 'utf-8'), ('192.168.1.8', 4210))
                 send_midi_msg(path, cc_mapper)
 
 

@@ -1,0 +1,10 @@
+{
+    "name": "shimi-prosody-control-panel",
+    "version": "0.0.1",
+    "dependencies": {
+        "osc-js": "^2.1.0"
+    },
+    "scripts": {
+        "start": "open panel.html && node oscBridge.js"
+    }
+}

@@ -1,3 +1,5 @@
 .DS_Store
-__pycache__
 .vscode
+midi
+python/__pycache__
+js/node_modules

@@ -217,6 +217,20 @@ MIDIdef.cc(\cc_noise, {
 )
 
 ///////////////////////////////////////////////////////////
+// Osc Example
+(
+OSCdef.new(
+	\toggle,
+	{
+		arg msg, time, addr, port;
+		[msg, time, addr, port].postln;
+	},
+	'/frompython'
+)
+)
+NetAddr.langPort;
+
+///////////////////////////////////////////////////////////
 // Build GUI elements
 /*
 (
