@@ -19,7 +19,7 @@ class ParamMapper():
     def __init__(self):
         self._param_values = dict.fromkeys(ParamMapper.PARAM_RANGES, 0.)
 
-    def update_param(self, param, value):
+    def update_and_map(self, param, value):
         ''' Update the parameter, and return a dict of the updated outputs
         Args:
         - param: the parameter
@@ -33,11 +33,11 @@ class ParamMapper():
         self._param_values[param] = value
         # you should handle what outputs should be updated here
         if param in ('valence', 'power'):
-            return self._map_formants()
+            return self.map_formants()
         else:
             return {param: self._param_values[param]}
 
-    def _map_formants(self):
+    def map_formants(self):
         '''Get the formant frequencies based on the current param_values'''
         formant_control_params = {
             'a': {
@@ -85,6 +85,7 @@ class ParamMapper():
         # randomly picking vowels
         vowels = formant_control_params.keys()
         vowel1, vowel2 = random.sample(vowels, 2)
+        print('vowels:', vowel1 + vowel2)
         vowel1_f1, vowel1_f2 = map_vowel(vowel1, self._param_values['valence'],
                                          self._param_values['power'])
         vowel2_f1, vowel2_f2 = map_vowel(vowel2, self._param_values['valence'],

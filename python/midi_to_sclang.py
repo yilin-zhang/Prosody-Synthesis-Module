@@ -8,43 +8,54 @@ from osc_handlers import MidiOscConverter
 from config import SC_IP, SC_PORT
 
 
-def get_cc_handler(param_mapper):
+def get_handlers(param_mapper):
+    osc_addr = {
+        'vowel1_f1': '/formant/vowel1/f1',
+        'vowel1_f2': '/formant/vowel1/f2',
+        'vowel2_f1': '/formant/vowel2/f1',
+        'vowel2_f2': '/formant/vowel2/f2',
+        'tune': '/feature/tune',
+        'vibrato': '/feature/vibrato',
+        'brightness': '/feature/brightness',
+        'noiseness': '/feature/noiseness',
+    }
+
+    def note_on_handler(note, velocity, osc_sender):
+        output_dict = param_mapper.map_formants()
+        for output_param, val in output_dict.items():
+            osc_sender.send(osc_addr[output_param], val)
+        osc_sender.send('/note/velocity', velocity)
+        osc_sender.send('/note/note_on', note)
+
+    def note_off_handler(note, osc_sender):
+        osc_sender.send('/note/note_off', note)
+
     def cc_handler(control_num, control_val, osc_sender):
-        osc_addr = {
-            'vowel1_f1': '/formant/vowel1/f1',
-            'vowel1_f2': '/formant/vowel1/f2',
-            'vowel2_f1': '/formant/vowel2/f1',
-            'vowel2_f2': '/formant/vowel2/f2',
-            'tune': '/feature/tune',
-            'vibrato': '/feature/vibrato',
-            'brightness': '/feature/brightness',
-            'noiseness': '/feature/noiseness',
-        }
         output_dict = {}
         if control_num in (0, 1):
             if control_num == 0:
-                output_dict = param_mapper.update_param(
+                output_dict = param_mapper.update_and_map(
                     'valence', (control_val / 127. - 0.5) * 2)
             elif control_num == 1:
-                output_dict = param_mapper.update_param(
+                output_dict = param_mapper.update_and_map(
                     'power', (control_val / 127. - 0.5) * 2)
         elif control_num == 2:
-            output_dict = param_mapper.update_param('tune',
-                                                    (control_val - 64) / 64.)
+            output_dict = param_mapper.update_and_map('tune',
+                                                      (control_val - 64) / 64.)
         elif control_num == 3:
-            output_dict = param_mapper.update_param('vibrato',
-                                                    (control_val / 127.))
+            output_dict = param_mapper.update_and_map('vibrato',
+                                                      (control_val / 127.))
         elif control_num == 4:
-            output_dict = param_mapper.update_param('brightness',
-                                                    (control_val / 127.))
+            output_dict = param_mapper.update_and_map('brightness',
+                                                      (control_val / 127.))
         elif control_num == 5:
-            output_dict = param_mapper.update_param('noiseness',
-                                                    (control_val / 127.))
+            output_dict = param_mapper.update_and_map('noiseness',
+                                                      (control_val / 127.))
 
         for output_param, val in output_dict.items():
             osc_sender.send(osc_addr[output_param], val)
 
-    return cc_handler
+    return note_on_handler, note_off_handler, cc_handler
 
 
 def send_osc_msg(midi_path, midi_osc_converter):
@@ -83,6 +94,7 @@ if __name__ == '__main__':
         dir_path = sys.argv[1]
 
     param_mapper = ParamMapper()
-    midi_osc_converter = MidiOscConverter(SC_IP, SC_PORT,
-                                          get_cc_handler(param_mapper))
+    note_on_handler, note_off_handler, cc_handler = get_handlers(param_mapper)
+    midi_osc_converter = MidiOscConverter(SC_IP, SC_PORT, note_on_handler,
+                                          note_off_handler, cc_handler)
     watch_dir(dir_path, midi_osc_converter)

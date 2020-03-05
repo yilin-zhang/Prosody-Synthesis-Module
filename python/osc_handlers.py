@@ -51,17 +51,23 @@ class MidiOscConverter():
     def __init__(self,
                  send_ip,
                  send_port,
+                 note_on_handler=False,
+                 note_off_handler=False,
                  cc_handler=False,
                  root_address='/vsynth'):
         self._osc_sender = OscSender(send_ip, send_port, root_address)
+        self._note_on_handler = note_on_handler
+        self._note_off_handler = note_off_handler
         self._cc_handler = cc_handler
 
     def send_osc(self, midi_message):
         if midi_message.type == 'note_on':
-            self._osc_sender.send('/note/velocity', midi_message.velocity)
-            self._osc_sender.send('/note/note_on', midi_message.note)
+            note = midi_message.note
+            velocity = midi_message.velocity
+            self._note_on_handler(note, velocity, self._osc_sender)
         elif midi_message.type == 'note_off':
-            self._osc_sender.send('/note/note_off', midi_message.note)
+            note = midi_message.note
+            self._note_off_handler(note, self._osc_sender)
         elif (self._cc_handler and midi_message.type == 'control_change'):
             control_num = midi_message.control
             control_val = midi_message.value
