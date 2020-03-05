@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
 midi
+config.yml
 python/__pycache__
 js/node_modules

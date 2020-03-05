@@ -1,8 +1,7 @@
+import time
 from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from pythonosc import udp_client
-
-from config import OSC_BRIDGE_IP, OSC_BRIDGE_PORT, SC_IP, SC_PORT
 
 
 class OscTransmitter():
@@ -48,13 +47,23 @@ class OscSender():
         self._udp_client.send_message(self._root_address + address, message)
 
 
-if __name__ == '__main__':
+class MidiOscConverter():
+    def __init__(self,
+                 send_ip,
+                 send_port,
+                 cc_handler=False,
+                 root_address='/vsynth'):
+        self._osc_sender = OscSender(send_ip, send_port, root_address)
+        self._cc_handler = cc_handler
 
-    def send_to_sclang(addr, message, client):
-        print(message)
-        client.send_message(addr, message)
-
-    osc_trans = OscTransmitter(OSC_BRIDGE_IP, OSC_BRIDGE_PORT, SC_IP, SC_PORT)
-    osc_trans.map("/vsynth/vco/1", send_to_sclang)
-    osc_trans.map("/vsynth/vco/2", send_to_sclang)
-    osc_trans.serve()
+    def send_osc(self, midi_message):
+        if midi_message.type == 'note_on':
+            self._osc_sender.send('/note/velocity', midi_message.velocity)
+            self._osc_sender.send('/note/note_on', midi_message.note)
+        elif midi_message.type == 'note_off':
+            self._osc_sender.send('/note/note_off', midi_message.note)
+        elif (self._cc_handler and midi_message.type == 'control_change'):
+            control_num = midi_message.control
+            control_val = midi_message.value
+            self._cc_handler(control_num, control_val, self._osc_sender)
+        time.sleep(midi_message.time)

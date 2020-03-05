@@ -1,7 +1,6 @@
 import random
 from typing import List, Tuple, Dict
 from mido.messages.messages import Message
-# from osc_transmitter import OscTransmitter
 
 
 class ParamMapper():
@@ -32,15 +31,14 @@ class ParamMapper():
                 and value <= ParamMapper.PARAM_RANGES[param][1]):
             return
         self._param_values[param] = value
+        # you should handle what outputs should be updated here
         if param in ('valence', 'power'):
             return self._map_formants()
         else:
             return {param: self._param_values[param]}
 
-    def get_param(self, param: str) -> float:
-        return self._param_values[param]
-
     def _map_formants(self):
+        '''Get the formant frequencies based on the current param_values'''
         formant_control_params = {
             'a': {
                 'f1': 675,  # in Hz
