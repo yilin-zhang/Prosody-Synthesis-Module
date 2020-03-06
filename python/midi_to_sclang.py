@@ -33,13 +33,12 @@ def get_handlers(param_mapper):
 
     def cc_handler(control_num, control_val, osc_sender):
         output_dict = {}
-        if control_num in (1, 2):
-            if control_num == 1:
-                output_dict = param_mapper.update_and_map(
-                    'valence', (control_val / 127. - 0.5) * 2)
-            elif control_num == 2:
-                output_dict = param_mapper.update_and_map(
-                    'power', (control_val / 127. - 0.5) * 2)
+        if control_num == 1:
+            output_dict = param_mapper.update_and_map(
+                'valence', (control_val / 127. - 0.5) * 2)
+        elif control_num == 2:
+            output_dict = param_mapper.update_and_map(
+                'power', (control_val / 127. - 0.5) * 2)
         elif control_num == 3:
             output_dict = param_mapper.update_and_map('tune',
                                                       (control_val - 64) / 64.)
