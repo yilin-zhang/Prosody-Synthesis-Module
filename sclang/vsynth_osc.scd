@@ -8,9 +8,9 @@
 // | u     |     300 |    1863 |
 
 (
-SynthDef(\vsynth,{
+SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
-	tune=0.5, vib=0, brightness=1, noise=0,
+	tune=0, vib=0, brightness=1, noise=0,
 	vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
 	gate=0, out=0;
 
@@ -52,45 +52,24 @@ SynthDef(\vsynth,{
 ///////////////////////////////////////////////////////////
 // Define global variables
 (
+// Notes
 ~notes = Array.fill(128, {nil});
 ~notes.postcs;
 ~velocity = 0;
-
-// GUI
-//~slider_size = [30, 150];
-//~slider_y = 50; // the y-axis position
-//~knob_size = 30;
-//~txt_y = 30;
-
-~formants = [
-	[675, 1550], // a (650~700), (1510~1590)
-	[350, 2120], // i (310~390), (1970~2170)
-	[390, 1390]  // u (350~430), (1380~1410)
-];
-
-~control_ranges = [
-	[75, 150],
-	[120, 150],
-	[90, 70]
-];
 
 // Oscillators
 ~osc1_val = 0.8;
 ~osc2_val = 0.8;
 
-// CC
-~vowel1_val = 0;                     // CC0
-~vowel1_f1_val = ~formants[0][0];    // CC1
-~vowel1_f2_val = ~formants[0][1];    // CC2
-~vowel2_val = 1;                     // CC3
-~vowel2_f1_val = ~formants[1][0];    // CC4
-~vowel2_f2_val = ~formants[1][1];    // CC5
-~tune_val = 0;                       // CC6
-~vib_val = 0;                        // CC7
-~brightness_val = 0;                 // CC8
-~noise_val = 0;                      // CC9
-
-
+// Parameters
+~vowel1_f1_val = 0;
+~vowel1_f2_val = 0;
+~vowel2_f1_val = 0;
+~vowel2_f2_val = 0;
+~tune_val = 0;
+~vib_val = 0;
+~brightness_val = 0;
+~noise_val = 0;
 )
 
 ///////////////////////////////////////////////////////////
@@ -105,6 +84,7 @@ OSCdef.new(\note_on, {
 		\amp, ~velocity.linexp(0.0, 1.0, 0.05, 1), // volume control
 		\gate, 1,
 		\out, 0,
+		\tune, ~tune_val,
 		\vib, ~vib_val,
 		\noise, ~noise_val,
 		\brightness, ~brightness_val,
@@ -142,6 +122,12 @@ OSCdef.new(\note_velocity, {
 	arg msg, time, addr, port;
 	~velocity = msg[1].asFloat;
 }, '/vsynth/note/velocity');
+
+OSCdef.new(\tune, {
+	arg msg, time, addr, port;
+	~tune_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\tune, ~tune_val)};
+}, '/vsynth/feature/tune');
 
 OSCdef.new(\vibrato, {
 	arg msg, time, addr, port;
@@ -183,4 +169,3 @@ OSCdef.new(\v2_f2, {
 
 )
 NetAddr.langPort;
-"1".asInt + 1;
