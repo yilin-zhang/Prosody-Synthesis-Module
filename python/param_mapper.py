@@ -13,9 +13,6 @@ class ParamMapper():
         'noiseness': (0, 1)
     }
 
-    OUPUT_PARAMS = ('vowel1_f1', 'vowel1_f2', 'vowel2_f1', 'vowel2_f2', 'tune',
-                    'vibrato', 'brightness', 'noiseness')
-
     def __init__(self):
         self._param_values = dict.fromkeys(ParamMapper.PARAM_RANGES, 0.)
 
@@ -33,9 +30,17 @@ class ParamMapper():
         self._param_values[param] = value
         # you should handle what outputs should be updated here
         if param in ('valence', 'power'):
-            return self.map_formants()
+            return {**self.map_attack(), **self.map_formants()}
         else:
             return {param: self._param_values[param]}
+
+    def map_attack(self):
+        attack_range = (0.05, 0.5)
+        scaled_power = -(self._param_values['power'] - 1) / 2
+        attack = scaled_power * (attack_range[1] -
+                                 attack_range[0]) + attack_range[0]
+        print('attack:', attack)
+        return {'attack': attack}
 
     def map_formants(self):
         '''Get the formant frequencies based on the current param_values'''

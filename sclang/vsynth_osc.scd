@@ -10,41 +10,42 @@
 (
 SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
-	tune=0, vib=0, brightness=1, noise=0,
+	attack=0, tune=0, vibrato=0, brightness=1, noiseness=0,
 	vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
 	gate=0, out=0;
 
-	var noiseSrc, output;
-	var vibrato, src;
-	var vibratonoise = LFNoise1.kr(10);
-	var cutoff1, cutoff2;
-	var env;
-	var vowel_trans = Rand.new(0.1, 0.5);
+	var vibrato_lfo, src, noise_src, sig_f1, sig_f2, sig;
+	var vibrato_noise = LFNoise1.kr(10);
+	var noise_env, env;
+	var vowel_trans = Rand.new(0.1, 0.2);
 
 	// sound source settings
 	freq = Lag.kr(freq, 0.1);
-	vib = Lag.kr(vib, 0.1);
-	// vibrato = ((freq.cpsmidi)+(Line.kr(0.0,vib,2.5)*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
-	vibrato = ((freq.cpsmidi+tune)+(vib*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
-	src = (Pulse.ar(vibrato, mul: osc1_amp*0.5) + Saw.ar(vibrato, mul: osc2_amp*0.5))*amp;
+	vibrato = Lag.kr(vibrato, 0.1);
+
+	// vibrato
+	vibrato_lfo = ((freq.cpsmidi+tune)+(vibrato*SinOsc.kr(6+(1.0*vibrato_noise),0,0.5))).midicps;
+	src = (Pulse.ar(vibrato_lfo, mul: osc1_amp*0.5) + Saw.ar(vibrato_lfo, mul: osc2_amp*0.5));
 
 	// formant settings
-	src = BPF.ar(src, XLine.kr(vowel1_f1, vowel2_f1, vowel_trans), 0.2, 2);
-	src = BPF.ar(src, XLine.kr(vowel1_f2, vowel2_f2, vowel_trans), 0.5, 4);
+	sig_f1 = BPF.ar(src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.08);
+	sig_f2 = BPF.ar(src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.2);
 
 	// add noise
-	noiseSrc = WhiteNoise.ar(0.03);
-	output= LPF.ar(src+(noise*noiseSrc), (brightness*6000)+1000);
+	noise_src = LPF.ar(PinkNoise.ar(0.05) * noiseness, brightness*1000+500, 2);
+
+	//src = DelayC.ar(src, attack/8.0);
+	sig = LPF.ar(sig_f1 + sig_f2 + noise_src, (brightness*6000)+1000);
 
 	env = EnvGen.kr(
-		Env.adsr(Rand.new(0.01, 0.1), 0.1, 0.8, Rand.new(0.1, 0.3)),
+		Env.adsr(attack, 0.05, 0.8, Rand.new(0.1, 0.3)),
 		gate,
 		doneAction:2
 	);
 
-	output = env * output;
+	sig = env * sig * amp;
 
-	Out.ar(out,output.dup)
+	Out.ar(out,sig.dup);
 
 }).add;
 )
@@ -62,19 +63,27 @@ SynthDef(\vsynth, {
 ~osc2_val = 0.8;
 
 // Parameters
+// Emotion-driven parameters
 ~vowel1_f1_val = 0;
 ~vowel1_f2_val = 0;
 ~vowel2_f1_val = 0;
 ~vowel2_f2_val = 0;
+~attack_val = 0;
+// Directly controlled parameters
 ~tune_val = 0;
-~vib_val = 0;
+~vibrato_val = 0;
 ~brightness_val = 0;
-~noise_val = 0;
+~noiseness_val = 0;
 )
 
 ///////////////////////////////////////////////////////////
-// Osc Example
+// Osc Receiving
 (
+OSCdef.new(\note_velocity, {
+	arg msg, time, addr, port;
+	~velocity = msg[1].asFloat;
+}, '/vsynth/note/velocity');
+
 OSCdef.new(\note_on, {
 	arg msg, time, addr, port;
 	var val = msg[1].asInt;
@@ -84,9 +93,10 @@ OSCdef.new(\note_on, {
 		\amp, ~velocity.linexp(0.0, 1.0, 0.05, 1), // volume control
 		\gate, 1,
 		\out, 0,
+		\attack, ~attack_val,
 		\tune, ~tune_val,
-		\vib, ~vib_val,
-		\noise, ~noise_val,
+		\vibrato, ~vibrato_val,
+		\noiseness, ~noiseness_val,
 		\brightness, ~brightness_val,
 		\osc1_amp, ~osc1_val,
 		\osc2_amp, ~osc2_val,
@@ -96,6 +106,15 @@ OSCdef.new(\note_on, {
 		\vowel2_f2, ~vowel2_f2_val,
 	]);
 }, '/vsynth/note/note_on');
+
+OSCdef.new(\note_off, {
+	arg msg, time, addr, port;
+	var val = msg[1].asInt;
+	~notes[val].set(\gate, 0);
+	~notes[val] = nil;
+}, '/vsynth/note/note_off');
+
+// VCO
 
 OSCdef.new(\vco_1, {
 	arg msg, time, addr, port;
@@ -111,41 +130,7 @@ OSCdef.new(\vco_2, {
 	~notes.do {|note| note.set(\osc2_amp, ~osc2_val)};
 }, 'vsynth/vco/2');
 
-OSCdef.new(\note_off, {
-	arg msg, time, addr, port;
-	var val = msg[1].asInt;
-	~notes[val].set(\gate, 0);
-	~notes[val] = nil;
-}, '/vsynth/note/note_off');
-
-OSCdef.new(\note_velocity, {
-	arg msg, time, addr, port;
-	~velocity = msg[1].asFloat;
-}, '/vsynth/note/velocity');
-
-OSCdef.new(\tune, {
-	arg msg, time, addr, port;
-	~tune_val = msg[1].asFloat;
-	~notes.do{|note| note.set(\tune, ~tune_val)};
-}, '/vsynth/feature/tune');
-
-OSCdef.new(\vibrato, {
-	arg msg, time, addr, port;
-	~vib_val = msg[1].asFloat;
-	~notes.do{|note| note.set(\vib, ~vib_val)};
-}, '/vsynth/feature/vibrato');
-
-OSCdef.new(\noiseness, {
-	arg msg, time, addr, port;
-	~noise_val = msg[1].asFloat;
-	~notes.do{|note| note.set(\noise, ~noise_val)};
-}, '/vsynth/feature/noiseness');
-
-OSCdef.new(\brightness, {
-	arg msg, time, addr, port;
-	~brightness_val = msg[1].asFloat;
-	~notes.do{|note| note.set(\brightness, ~brightness_val)};
-}, '/vsynth/feature/brightness');
+// Emotion driven parameters
 
 OSCdef.new(\v1_f1, {
 	arg msg, time, addr, port;
@@ -166,6 +151,37 @@ OSCdef.new(\v2_f2, {
 	arg msg, time, addr, port;
 	~vowel2_f2_val = msg[1].asFloat;
 }, '/vsynth/formant/vowel2/f2');
+
+OSCdef.new(\attack, {
+	arg msg, time, addr, port;
+	~attack_val = msg[1].asFloat;
+}, '/vsynth/feature/attack');
+
+// Directly controlled parameters
+
+OSCdef.new(\tune, {
+	arg msg, time, addr, port;
+	~tune_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\tune, ~tune_val)};
+}, '/vsynth/feature/tune');
+
+OSCdef.new(\vibrato, {
+	arg msg, time, addr, port;
+	~vibrato_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\vibrato, ~vibrato_val)};
+}, '/vsynth/feature/vibrato');
+
+OSCdef.new(\noiseness, {
+	arg msg, time, addr, port;
+	~noiseness_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\noiseness, ~noiseness_val)};
+}, '/vsynth/feature/noiseness');
+
+OSCdef.new(\brightness, {
+	arg msg, time, addr, port;
+	~brightness_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\brightness, ~brightness_val)};
+}, '/vsynth/feature/brightness');
 
 )
 NetAddr.langPort;

@@ -14,6 +14,7 @@ def get_handlers(param_mapper):
         'vowel1_f2': '/formant/vowel1/f2',
         'vowel2_f1': '/formant/vowel2/f1',
         'vowel2_f2': '/formant/vowel2/f2',
+        'attack': '/feature/attack',
         'tune': '/feature/tune',
         'vibrato': '/feature/vibrato',
         'brightness': '/feature/brightness',
