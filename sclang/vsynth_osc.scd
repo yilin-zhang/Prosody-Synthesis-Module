@@ -26,7 +26,7 @@ SynthDef(\vsynth,{
 	vib = Lag.kr(vib, 0.1);
 	// vibrato = ((freq.cpsmidi)+(Line.kr(0.0,vib,2.5)*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
 	vibrato = ((freq.cpsmidi+tune)+(vib*SinOsc.kr(6+(1.0*vibratonoise),0,0.5))).midicps;
-	src = Pulse.ar(vibrato, mul: osc1_amp*0.5) + Saw.ar(vibrato, mul: osc2_amp*0.5);
+	src = (Pulse.ar(vibrato, mul: osc1_amp*0.5) + Saw.ar(vibrato, mul: osc2_amp*0.5))*amp;
 
 	// formant settings
 	src = BPF.ar(src, XLine.kr(vowel1_f1, vowel2_f1, vowel_trans), 0.2, 2);
@@ -99,10 +99,10 @@ SynthDef(\vsynth,{
 OSCdef.new(\note_on, {
 	arg msg, time, addr, port;
 	var val = msg[1].asInt;
-
+	val.postln;
 	~notes[val] = Synth.new(\vsynth, [
 		\freq, val.midicps,
-		\amp, ~velocity.linexp(1, 127, 0.05, 1), // volume control
+		\amp, ~velocity.linexp(0.0, 1.0, 0.05, 1), // volume control
 		\gate, 1,
 		\out, 0,
 		\vib, ~vib_val,
@@ -140,22 +140,25 @@ OSCdef.new(\note_off, {
 
 OSCdef.new(\note_velocity, {
 	arg msg, time, addr, port;
-	~velocity = msg[1].asInt;
+	~velocity = msg[1].asFloat;
 }, '/vsynth/note/velocity');
 
 OSCdef.new(\vibrato, {
 	arg msg, time, addr, port;
 	~vib_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\vib, ~vib_val)};
 }, '/vsynth/feature/vibrato');
 
 OSCdef.new(\noiseness, {
 	arg msg, time, addr, port;
 	~noise_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\noise, ~noise_val)};
 }, '/vsynth/feature/noiseness');
 
 OSCdef.new(\brightness, {
 	arg msg, time, addr, port;
 	~brightness_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\brightness, ~brightness_val)};
 }, '/vsynth/feature/brightness');
 
 OSCdef.new(\v1_f1, {
