@@ -8,3 +8,21 @@
     -webkit-transition: .2s; /* 0.2 seconds transition on hover */
     transition: opacity .2s;
   }
+
+.white-key {
+    fill: white;
+    stroke: black;
+}
+
+.white-key:hover {
+    fill: gray;
+}
+
+.black-key {
+    fill: black;
+    stroke: black;
+}
+
+.black-key:hover {
+    fill: gray;
+}
