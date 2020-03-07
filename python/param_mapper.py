@@ -46,7 +46,7 @@ class ParamMapper():
         self._param_values[param] = value
 
     def _map_attack(self):
-        attack_range = (0.05, 0.5)
+        attack_range = (0.01, 0.5)
         scaled_power = -(self._param_values['power'] - 1) / 2
         attack = scaled_power * (attack_range[1] -
                                  attack_range[0]) + attack_range[0]

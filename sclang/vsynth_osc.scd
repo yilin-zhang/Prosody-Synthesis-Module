@@ -39,7 +39,7 @@ SynthDef(\vsynth, {
 
 	// HF-LF control
 	sig_l = BPF.ar(sig, 800, rq: 1.0, mul: lf_ratio);
-	sig_h = BPF.ar(sig, 3000, rq: 1.0, mul: hf_ratio);
+	sig_h = BPF.ar(sig, 4000, rq: 1.0, mul: hf_ratio);
 	sig = sig_l + sig_h;
 
 	// LPF (brightness control)
@@ -51,7 +51,7 @@ SynthDef(\vsynth, {
 		doneAction:2
 	);
 
-	sig = env * sig * amp;
+	sig = env * sig * amp * 3;
 
 	Out.ar(out,sig.dup);
 
