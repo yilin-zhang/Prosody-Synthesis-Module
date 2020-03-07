@@ -22,7 +22,7 @@ def get_handlers(param_mapper):
     }
 
     def note_on_handler(note, velocity, osc_sender):
-        output_dict = param_mapper.map_formants()
+        output_dict = param_mapper.send_event('note_on')
         for output_param, val in output_dict.items():
             osc_sender.send(osc_addr[output_param], val)
         osc_sender.send('/note/velocity', velocity / 127)
@@ -34,23 +34,23 @@ def get_handlers(param_mapper):
     def cc_handler(control_num, control_val, osc_sender):
         output_dict = {}
         if control_num == 1:
-            output_dict = param_mapper.update_and_map(
+            output_dict = param_mapper.send_event(
                 'valence', (control_val / 127. - 0.5) * 2)
         elif control_num == 2:
-            output_dict = param_mapper.update_and_map(
+            output_dict = param_mapper.send_event(
                 'power', (control_val / 127. - 0.5) * 2)
         elif control_num == 3:
-            output_dict = param_mapper.update_and_map('tune',
-                                                      (control_val - 64) / 64.)
+            output_dict = param_mapper.send_event('tune',
+                                                  (control_val - 64) / 64.)
         elif control_num == 4:
-            output_dict = param_mapper.update_and_map('vibrato',
-                                                      (control_val / 127.))
+            output_dict = param_mapper.send_event('vibrato',
+                                                  (control_val / 127.))
         elif control_num == 5:
-            output_dict = param_mapper.update_and_map('brightness',
-                                                      (control_val / 127.))
+            output_dict = param_mapper.send_event('brightness',
+                                                  (control_val / 127.))
         elif control_num == 6:
-            output_dict = param_mapper.update_and_map('noisiness',
-                                                      (control_val / 127.))
+            output_dict = param_mapper.send_event('noisiness',
+                                                  (control_val / 127.))
 
         for output_param, val in output_dict.items():
             osc_sender.send(osc_addr[output_param], val)

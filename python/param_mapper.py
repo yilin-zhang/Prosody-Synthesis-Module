@@ -16,25 +16,38 @@ class ParamMapper():
     def __init__(self):
         self._param_values = dict.fromkeys(ParamMapper.PARAM_RANGES, 0.)
 
-    def update_and_map(self, param, value):
-        ''' Update the parameter, and return a dict of the updated outputs
+    def send_event(self, event, value=0):
+        ''' Send an event and a value(optional), and return a dict of the
+        updated outputs
         Args:
-        - param: the parameter
+        - event: An event, including all the parameters and note_on
         - value: the value of the parameter
         Return:
         - a dict of updated output
         '''
+        if event == 'note_on':
+            return {**self._map_attack(), **self._map_formants()}
+        if event in ('valence', 'power'):
+            self._update(event, value)
+            return {}
+        if event in ('tune', 'vibrato', 'brightness', 'noisiness'):
+            return self._update_and_map(event, value)
+
+    def _update(self, param, value):
         if not (value >= ParamMapper.PARAM_RANGES[param][0]
                 and value <= ParamMapper.PARAM_RANGES[param][1]):
             return
         self._param_values[param] = value
+
+    def _update_and_map(self, param, value):
+        self._update(param, value)
         # you should handle what outputs should be updated here
         if param in ('valence', 'power'):
-            return {**self.map_attack(), **self.map_formants()}
+            return {**self._map_attack(), **self._map_formants()}
         else:
             return {param: self._param_values[param]}
 
-    def map_attack(self):
+    def _map_attack(self):
         attack_range = (0.05, 0.5)
         scaled_power = -(self._param_values['power'] - 1) / 2
         attack = scaled_power * (attack_range[1] -
@@ -42,7 +55,7 @@ class ParamMapper():
         print('attack:', attack)
         return {'attack': attack}
 
-    def map_formants(self):
+    def _map_formants(self):
         '''Get the formant frequencies based on the current param_values'''
         formant_control_params = {
             'a': {
