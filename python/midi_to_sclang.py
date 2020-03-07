@@ -79,9 +79,9 @@ def watch_dir(dir_path, midi_osc_converter):
 
 
 def realtime_input(midi_osc_converter):
-    inport = mido.open_input(MIDI_DEVICE)
-    while True:
-        for msg in inport.iter_pending():
+    with mido.open_input(MIDI_DEVICE) as inport:
+        while True:
+            msg = inport.receive()
             midi_osc_converter.send_osc(msg)
 
 
