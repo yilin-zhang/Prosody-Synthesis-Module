@@ -10,7 +10,7 @@
 (
 SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
-	attack=0, tune=0, vibrato=0, brightness=1, noiseness=0,
+	attack=0, tune=0, vibrato=0, brightness=1, noisiness=0,
 	vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
 	gate=0, out=0;
 
@@ -32,7 +32,7 @@ SynthDef(\vsynth, {
 	sig_f2 = BPF.ar(src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.2);
 
 	// add noise
-	noise_src = LPF.ar(PinkNoise.ar(0.05) * noiseness, brightness*1000+500, 2);
+	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 2);
 
 	//src = DelayC.ar(src, attack/8.0);
 	sig = LPF.ar(sig_f1 + sig_f2 + noise_src, (brightness*6000)+1000);
@@ -73,7 +73,7 @@ SynthDef(\vsynth, {
 ~tune_val = 0;
 ~vibrato_val = 0;
 ~brightness_val = 0;
-~noiseness_val = 0;
+~noisiness_val = 0;
 )
 
 ///////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ OSCdef.new(\note_on, {
 		\attack, ~attack_val,
 		\tune, ~tune_val,
 		\vibrato, ~vibrato_val,
-		\noiseness, ~noiseness_val,
+		\noisiness, ~noisiness_val,
 		\brightness, ~brightness_val,
 		\osc1_amp, ~osc1_val,
 		\osc2_amp, ~osc2_val,
@@ -171,11 +171,11 @@ OSCdef.new(\vibrato, {
 	~notes.do{|note| note.set(\vibrato, ~vibrato_val)};
 }, '/vsynth/feature/vibrato');
 
-OSCdef.new(\noiseness, {
+OSCdef.new(\noisiness, {
 	arg msg, time, addr, port;
-	~noiseness_val = msg[1].asFloat;
-	~notes.do{|note| note.set(\noiseness, ~noiseness_val)};
-}, '/vsynth/feature/noiseness');
+	~noisiness_val = msg[1].asFloat;
+	~notes.do{|note| note.set(\noisiness, ~noisiness_val)};
+}, '/vsynth/feature/noisiness');
 
 OSCdef.new(\brightness, {
 	arg msg, time, addr, port;

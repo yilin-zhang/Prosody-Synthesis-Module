@@ -18,7 +18,7 @@ def get_handlers(param_mapper):
         'tune': '/feature/tune',
         'vibrato': '/feature/vibrato',
         'brightness': '/feature/brightness',
-        'noiseness': '/feature/noiseness',
+        'noisiness': '/feature/noisiness',
     }
 
     def note_on_handler(note, velocity, osc_sender):
@@ -49,7 +49,7 @@ def get_handlers(param_mapper):
             output_dict = param_mapper.update_and_map('brightness',
                                                       (control_val / 127.))
         elif control_num == 6:
-            output_dict = param_mapper.update_and_map('noiseness',
+            output_dict = param_mapper.update_and_map('noisiness',
                                                       (control_val / 127.))
 
         for output_param, val in output_dict.items():

@@ -10,7 +10,7 @@ class ParamMapper():
         'tune': (-1, 1),
         'vibrato': (0, 1),
         'brightness': (0, 1),
-        'noiseness': (0, 1)
+        'noisiness': (0, 1)
     }
 
     def __init__(self):
