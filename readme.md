@@ -37,7 +37,7 @@ midi_device: MPKmini2
 
 Usually you only need to change the `sc_port` and `midi_device` entries.
 
-To check all the available devices on your computer, go to your Python REPEL,
+To check all the available devices on your computer, go to your Python REPL,
 type in the following commands:
 
 ``` python
