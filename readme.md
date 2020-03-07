@@ -17,11 +17,15 @@ Web Interface / MIDI -> (OSC) -> Feature Mapping and OSC Transmit -> (OSC) -> Su
 ### Prerequisite
 Make sure you have Python, SuperCollider, Node.js and `npm` installed.
 
-Python dependencies
-- `pythonosc`
-- `mido`
-- `watchgod`
-- `PyYAML`
+In `python/` directory, run the following command to install Python dependencies:
+``` shell
+pip install -r requirements.txt
+```
+
+In `js/` directory, run the following command to install Node.js dependencies:
+``` shell
+npm i
+```
 
 Most of time, you need a configuration file to make it work properly. To do
 this, put a file `config.yml` in the project root. Here's a configuration example:
@@ -53,8 +57,7 @@ the same as you specified in the `sc_port` entry in `config.yml`.
 
 ### Web Interface
 
-If this is the first time you run the program, go to `js/` folder, run `npm i`
-to install dependencies, and run `npm start` to start the web interface.
+run `npm start` to start the web interface.
 
 Also run `python/web_to_sclang` to enable the OSC transmit.
 
