@@ -25,27 +25,25 @@ class ParamMapper():
         Return:
         - a dict of updated output
         '''
-        if event == 'note_on':
-            return {**self._map_attack(), **self._map_formants()}
-        if event in ('valence', 'power'):
+        if event == 'note_on':  # map emotion-driven outputs
+            return {
+                **self._map_attack(),
+                **self._map_lf_hf(),
+                **self._map_formants()
+            }
+        if event in ('valence', 'power'):  # only update
             self._update(event, value)
             return {}
-        if event in ('tune', 'vibrato', 'brightness', 'noisiness'):
-            return self._update_and_map(event, value)
+        if event in ('tune', 'vibrato', 'brightness',
+                     'noisiness'):  # no mapping
+            self._update(event, value)
+            return {event: self._param_values[event]}
 
     def _update(self, param, value):
         if not (value >= ParamMapper.PARAM_RANGES[param][0]
                 and value <= ParamMapper.PARAM_RANGES[param][1]):
             return
         self._param_values[param] = value
-
-    def _update_and_map(self, param, value):
-        self._update(param, value)
-        # you should handle what outputs should be updated here
-        if param in ('valence', 'power'):
-            return {**self._map_attack(), **self._map_formants()}
-        else:
-            return {param: self._param_values[param]}
 
     def _map_attack(self):
         attack_range = (0.05, 0.5)
@@ -54,6 +52,23 @@ class ParamMapper():
                                  attack_range[0]) + attack_range[0]
         print('attack:', attack)
         return {'attack': attack}
+
+    def _map_lf_hf(self):
+        hf_range = (-8, 8)  # in power db
+        valence_ratio = -0.5
+        power_ratio = 0.5
+        valence = self._param_values['valence']
+        power = self._param_values['power']
+
+        hf_db = (hf_range[1] - hf_range[0]) * (
+            valence_ratio * valence +
+            power_ratio * power) / 2 + (hf_range[0] + hf_range[1]) / 2
+        hf_ratio = 10**(hf_db / 20)
+        lf_ratio = 1 / hf_ratio
+        print('lf_ratio:', lf_ratio)
+        print('hf_ratio:', hf_ratio)
+
+        return {'lf_ratio': lf_ratio, 'hf_ratio': hf_ratio}
 
     def _map_formants(self):
         '''Get the formant frequencies based on the current param_values'''

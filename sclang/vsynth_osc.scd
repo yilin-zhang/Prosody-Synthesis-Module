@@ -10,11 +10,11 @@
 (
 SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
-	attack=0, tune=0, vibrato=0, brightness=1, noisiness=0,
-	vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
+	tune=0, vibrato=0, brightness=1, noisiness=0,
+	lf_ratio=1, hf_ratio=1, attack=0, vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
 	gate=0, out=0;
 
-	var vibrato_lfo, src, noise_src, sig_f1, sig_f2, sig;
+	var vibrato_lfo, src, noise_src, sig_f1, sig_f2, sig_h, sig_l, sig;
 	var vibrato_noise = LFNoise1.kr(10);
 	var noise_env, env;
 	var vowel_trans = Rand.new(0.1, 0.2);
@@ -34,8 +34,16 @@ SynthDef(\vsynth, {
 	// add noise
 	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 2);
 
-	//src = DelayC.ar(src, attack/8.0);
-	sig = LPF.ar(sig_f1 + sig_f2 + noise_src, (brightness*6000)+1000);
+	// signal combination
+	sig = sig_f1 + sig_f2 + noise_src;
+
+	// HF-LF control
+	sig_l = BPF.ar(sig, 800, rq: 1.0, mul: lf_ratio);
+	sig_h = BPF.ar(sig, 3000, rq: 1.0, mul: hf_ratio);
+	sig = sig_l + sig_h;
+
+	// LPF (brightness control)
+	sig = LPF.ar(sig, (brightness*10000)+3000);
 
 	env = EnvGen.kr(
 		Env.adsr(attack, 0.05, 0.8, Rand.new(0.1, 0.3)),
@@ -69,6 +77,8 @@ SynthDef(\vsynth, {
 ~vowel2_f1_val = 0;
 ~vowel2_f2_val = 0;
 ~attack_val = 0;
+~lf_ratio_val = 1;
+~hf_ratio_val = 1;
 // Directly controlled parameters
 ~tune_val = 0;
 ~vibrato_val = 0;
@@ -94,6 +104,8 @@ OSCdef.new(\note_on, {
 		\gate, 1,
 		\out, 0,
 		\attack, ~attack_val,
+		\lf_ratio, ~lf_ratio_val,
+		\hf_ratio, ~hf_ratio_val,
 		\tune, ~tune_val,
 		\vibrato, ~vibrato_val,
 		\noisiness, ~noisiness_val,
@@ -156,6 +168,16 @@ OSCdef.new(\attack, {
 	arg msg, time, addr, port;
 	~attack_val = msg[1].asFloat;
 }, '/vsynth/feature/attack');
+
+OSCdef.new(\lf_ratio, {
+	arg msg, time, addr, port;
+	~lf_ratio_val = msg[1].asFloat;
+}, '/vsynth/feature/lf_ratio');
+
+OSCdef.new(\hf_ratio, {
+	arg msg, time, addr, port;
+	~hf_ratio_val = msg[1].asFloat;
+}, '/vsynth/feature/hf_ratio');
 
 // Directly controlled parameters
 
