@@ -27,8 +27,9 @@ In `js/` directory, run the following command to install Node.js dependencies:
 npm i
 ```
 
-Most of time, you need a configuration file to make it work properly. To do
-this, put a file `config.yml` in the project root. Here's a configuration example:
+Most of the time, you need a configuration file to make it work properly. To do
+this, put a file `config.yml` in the project root. Here's a configuration
+example:
 
 ``` yaml
 osc_bridge_ip: 127.0.0.1
@@ -51,13 +52,13 @@ type in the following commands:
 
 ### SuperCollider
 
-Run `sclang/vsynth_osc.scd` on SuperCollider. Most of time you need to run
+Run `sclang/vsynth_osc.scd` on SuperCollider. Most of the time you need to run
 `NetAddr.langPort` to know the current OSC port in use. Make sure this port is
 the same as you specified in the `sc_port` entry in `config.yml`.
 
 ### Web Interface
 
-run `npm start` to start the web interface.
+Run `npm start` to start the web interface.
 
 Also run `python/web_to_sclang` to enable the OSC transmit.
 
