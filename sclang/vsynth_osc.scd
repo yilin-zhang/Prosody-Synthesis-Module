@@ -1,3 +1,5 @@
+s.boot;
+
 ///////////////////////////////////////////////////////////
 // Define the vocal synth - vsynth
 
@@ -7,7 +9,7 @@
 // | i     |     277 |    2321 |
 // | u     |     300 |    1863 |
 
-(
+
 SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
 	tune=0, vibrato=0, brightness=1, noisiness=0,
@@ -56,14 +58,14 @@ SynthDef(\vsynth, {
 	Out.ar(out,sig.dup);
 
 }).add;
-)
+
 
 ///////////////////////////////////////////////////////////
 // Define global variables
-(
+
 // Notes
 ~notes = Array.fill(128, {nil});
-~notes.postcs;
+//~notes.postcs;
 ~velocity = 0;
 
 // Oscillators
@@ -84,11 +86,11 @@ SynthDef(\vsynth, {
 ~vibrato_val = 0;
 ~brightness_val = 0;
 ~noisiness_val = 0;
-)
+
 
 ///////////////////////////////////////////////////////////
 // Osc Receiving
-(
+
 OSCdef.new(\note_velocity, {
 	arg msg, time, addr, port;
 	~velocity = msg[1].asFloat;
@@ -205,5 +207,5 @@ OSCdef.new(\brightness, {
 	~notes.do{|note| note.set(\brightness, ~brightness_val)};
 }, '/vsynth/feature/brightness');
 
-)
-NetAddr.langPort;
+"Listening on: ".post;
+NetAddr.langPort.postln;

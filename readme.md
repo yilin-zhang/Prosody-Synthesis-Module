@@ -52,9 +52,18 @@ type in the following commands:
 
 ### SuperCollider
 
-Run `sclang/vsynth_osc.scd` on SuperCollider. Most of the time you need to run
-`NetAddr.langPort` to know the current OSC port in use. Make sure this port is
-the same as you specified in the `sc_port` entry in `config.yml`.
+Run `sclang/vsynth_osc.scd` on SuperCollider. You can run this either on
+SuperCollider IDE or through command line. For command line, make sure you are
+at the project root directory, and use the following command:
+
+```
+/path/to/sclang sclang/vsynth_osc.scd
+```
+
+Once you start running the code, there's one line in the output that tells you
+the port SuperCollider is listening on (`Listening on: xxxxx`). Then check your
+`config.yml`, make sure the port specified in `sc_port` entry is the same as
+this port.
 
 ### Web Interface
 
