@@ -29,15 +29,15 @@ SynthDef(\vsynth, {
 	vibrato_lfo = ((freq.cpsmidi+tune)+(vibrato*SinOsc.kr(6+(1.0*vibrato_noise),0,0.5))).midicps;
 	src = (Pulse.ar(vibrato_lfo, mul: osc1_amp*0.5) + Saw.ar(vibrato_lfo, mul: osc2_amp*0.5));
 
-	// formant settings
-	sig_f1 = BPF.ar(src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.08);
-	sig_f2 = BPF.ar(src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.2);
-
 	// add noise
-	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 2);
+	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 10);
+
+	// formant settings
+	sig_f1 = BPF.ar(src+noise_src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.1, 1);
+	sig_f2 = BPF.ar(src+noise_src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.1, 1.5);
 
 	// signal combination
-	sig = sig_f1 + sig_f2 + noise_src;
+	sig = sig_f1 + sig_f2;
 
 	// HF-LF control
 	sig_l = BPF.ar(sig, 800, rq: 1.0, mul: lf_ratio);
@@ -55,7 +55,7 @@ SynthDef(\vsynth, {
 
 	sig = env * sig * amp * 3;
 
-	Out.ar(out,sig.dup);
+	Out.ar(out, Limiter.ar(sig.dup, 0.3));
 
 }).add;
 
@@ -69,8 +69,8 @@ SynthDef(\vsynth, {
 ~velocity = 0;
 
 // Oscillators
-~osc1_val = 0.8;
-~osc2_val = 0.8;
+~osc1_val = 0;
+~osc2_val = 1;
 
 // Parameters
 // Emotion-driven parameters

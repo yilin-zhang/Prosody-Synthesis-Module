@@ -54,7 +54,7 @@ class ParamMapper():
         return {'attack': attack}
 
     def _map_lf_hf(self):
-        hf_range = (-8, 8)  # in power db
+        hf_range = (-5, 5)  # in power db
         valence_ratio = -0.5
         power_ratio = 0.5
         valence = self._param_values['valence']
@@ -74,8 +74,8 @@ class ParamMapper():
         '''Get the formant frequencies based on the current param_values'''
         formant_control_params = {
             'a': {
-                'f1': 675,  # in Hz
-                'f2': 1550,
+                'f1': 850,  # in Hz
+                'f2': 1610,
                 'f1_range': 75,  # in Hz
                 'f2_range': 150,
                 'f1_valence_ratio': 0.3,
@@ -84,8 +84,8 @@ class ParamMapper():
                 'f2_power_ratio': 0.1,
             },
             'i': {
-                'f1': 350,
-                'f2': 2120,
+                'f1': 240,
+                'f2': 2400,
                 'f1_range': 120,
                 'f2_range': 150,
                 'f1_valence_ratio': -0.3,
@@ -94,8 +94,8 @@ class ParamMapper():
                 'f2_power_ratio': 0.3,
             },
             'u': {
-                'f1': 390,
-                'f2': 1290,
+                'f1': 250,
+                'f2': 595,
                 'f1_range': 90,
                 'f2_range': 70,
                 'f1_valence_ratio': 0.4,
