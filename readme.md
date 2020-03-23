@@ -7,9 +7,13 @@ This project provides:
 2. Two Python OSC modules that handle OSC transmit and MIDI-to-OSC respectively.
 3. A Python prosody feature mapping module.
 
-Workflow
+Workflow:
 ```
-Web Interface / MIDI -> (OSC) -> Feature Mapping and OSC Transmit -> (OSC) -> SuperCollider
+Web Interface -> (OSC) -> Feature Mapping and OSC Transmit -> (OSC) -> SuperCollider
+```
+or
+```
+MIDI -> (mido) -> Feature Mapping and OSC Transmit -> (OSC) -> SuperCollider
 ```
 
 ## Set-up
