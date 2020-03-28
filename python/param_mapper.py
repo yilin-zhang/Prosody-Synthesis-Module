@@ -56,7 +56,7 @@ class ParamMapper():
         return {'attack': attack}
 
     def _map_lf_hf(self):
-        hf_range = (-5, 5)  # in power db
+        hf_range = (-1.5, 1.5)  # in power db
         valence_ratio = -0.5
         power_ratio = 0.5
         valence = self._param_values['valence']
@@ -154,7 +154,7 @@ class ParamMapper():
                 {'a': 0.1, 'i': 0.8, 'u': 0.1},  # quadrant 1, happy
                 {'a': 0.8, 'i': 0.1, 'u': 0.1},  # quadrant 2, angry
                 {'a': 0.1, 'i': 0.1, 'u': 0.8},  # quadrant 3, sad
-                {'a': 0.2, 'i': 0.3, 'u': 0.3},  # quadrant 4, relief
+                {'a': 0.4, 'i': 0.4, 'u': 0.2},  # quadrant 4, relief
             )
 
             def get_select_proba(idx_1, idx_2, ratio):

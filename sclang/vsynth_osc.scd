@@ -70,8 +70,8 @@ SynthDef(\vsynth, {
 ~velocity = 0;
 
 // Oscillators
-~osc1_val = 0.8;
-~osc2_val = 0.2;
+~osc1_val = 0.7;
+~osc2_val = 0.3;
 
 // Parameters
 // Emotion-driven parameters
