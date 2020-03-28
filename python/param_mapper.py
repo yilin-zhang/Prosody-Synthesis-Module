@@ -1,4 +1,5 @@
 import random
+import math
 from typing import List, Tuple, Dict
 from mido.messages.messages import Message
 
@@ -115,14 +116,80 @@ class ParamMapper():
                   power) * vowel_params['f2_range'] + vowel_params['f2']
             return f1, f2
 
-        # randomly picking vowels
-        vowels = formant_control_params.keys()
-        vowel1, vowel2 = random.sample(vowels, 2)
+        def select_vowels(valence, power):
+            quadrant_proba = (
+                {'a': 0.1, 'i': 0.8, 'u': 0.1},  # quadrant 1, happy
+                {'a': 0.8, 'i': 0.1, 'u': 0.1},  # quadrant 2, angry
+                {'a': 0.1, 'i': 0.1, 'u': 0.8},  # quadrant 3, sad
+                {'a': 0.2, 'i': 0.3, 'u': 0.3},  # quadrant 4, relief
+            )
+
+            def get_select_proba(idx_1, idx_2, ratio):
+                select_proba =  {
+                    'a': quadrant_proba[idx_1]['a'] * (1 - ratio) + quadrant_proba[idx_2]['a'] * ratio,
+                    'i': quadrant_proba[idx_1]['i'] * (1 - ratio) + quadrant_proba[idx_2]['i'] * ratio,
+                    'u': quadrant_proba[idx_1]['u'] * (1 - ratio) + quadrant_proba[idx_2]['u'] * ratio,
+                }
+                # normalize
+                norm_select_proba = select_proba
+                norm_select_proba['a']  = select_proba['a'] / sum(select_proba.values())
+                norm_select_proba['i']  = select_proba['i'] / sum(select_proba.values())
+                norm_select_proba['u']  = select_proba['u'] / sum(select_proba.values())
+                return norm_select_proba
+
+            def get_vowel(select_proba):
+                rand_num = random.random()
+                if rand_num <= select_proba['a']:
+                    return 'a'
+                if rand_num <= select_proba['a'] + select_proba['i']:
+                    return 'i'
+                return 'u'
+
+            # calculate the angle
+            angle = 0
+            if valence != 0:
+                angle = math.degrees(math.atan(power/valence))
+            else:
+                if power > 0:
+                    angle = 90
+                elif power < 0:
+                    angle = -90
+
+            if valence < 0:  # if it's the left half
+                if angle > 0:
+                    angle -= 180
+                else:
+                    angle += 180
+
+            if angle >= -45 and angle < 45:      # 4 and 1
+                ratio = (angle - (-45)) / 90
+                select_proba = get_select_proba(3, 0, ratio)
+            elif angle >= 45 and angle < 135:    # 1 and 2
+                ratio = (angle - 45) / 90
+                select_proba = get_select_proba(0, 1, ratio)
+            elif angle >= 135 or angle < -135:   # 2 and 3
+                if angle < -135:
+                    angle += 360
+                ratio = (angle - 135) / 90
+                select_proba = get_select_proba(1, 2, ratio)
+            elif angle >= -135 and angle < -45:  # 3 and 4
+                ratio = (angle - (-135)) / 90
+                select_proba = get_select_proba(2, 3, ratio)
+
+            # select vowels based on probability
+            vowel1 = get_vowel(select_proba)
+            vowel2 = get_vowel(select_proba)
+
+            return vowel1, vowel2
+
+        valence = self._param_values['valence']
+        power = self._param_values['power']
+
+        vowel1, vowel2 = select_vowels(valence, power)
         print('vowels:', vowel1 + vowel2)
-        vowel1_f1, vowel1_f2 = map_vowel(vowel1, self._param_values['valence'],
-                                         self._param_values['power'])
-        vowel2_f1, vowel2_f2 = map_vowel(vowel2, self._param_values['valence'],
-                                         self._param_values['power'])
+
+        vowel1_f1, vowel1_f2 = map_vowel(vowel1, valence, power)
+        vowel2_f1, vowel2_f2 = map_vowel(vowel2, valence, power)
 
         return {
             'vowel1_f1': vowel1_f1,
