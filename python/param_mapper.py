@@ -30,6 +30,7 @@ class ParamMapper():
             return {
                 **self._map_attack(),
                 **self._map_lf_hf(),
+                **self._map_detune(),
                 **self._map_formants()
             }
         if event in ('valence', 'power'):  # only update
@@ -70,6 +71,38 @@ class ParamMapper():
         print('hf_ratio:', hf_ratio)
 
         return {'lf_ratio': lf_ratio, 'hf_ratio': hf_ratio}
+
+    def _map_detune(self):
+        detune_range = (0, -1)
+        valence = self._param_values['valence']
+        power = self._param_values['power']
+
+        # calculate the angle
+        angle = 0
+        if valence != 0:
+            angle = math.degrees(math.atan(power/valence))
+        else:
+            if power > 0:
+                angle = 90
+            elif power < 0:
+                angle = -90
+        if valence < 0:  # if it's the left half
+            if angle > 0:
+                angle -= 180
+            else:
+                angle += 180
+        if angle < 0:  # make sure angle is in [0, 360)
+            angle += 360
+
+        angle_diff = abs(angle - 135)  # the distance to angry
+        ratio = 1
+        if angle_diff <= 45:
+            # angle_diff = 360 - angle_diff
+            ratio = angle_diff / 45
+        detune = detune_range[0] * ratio + detune_range[1] * (1 - ratio)
+        print('detune:', detune)
+        return {'detune': detune}
+
 
     def _map_formants(self):
         '''Get the formant frequencies based on the current param_values'''

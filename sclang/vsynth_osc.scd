@@ -13,10 +13,10 @@ s.boot;
 SynthDef(\vsynth, {
 	arg freq=440, amp=0.1, osc1_amp=0, osc2_amp=0,
 	tune=0, vibrato=0, brightness=1, noisiness=0,
-	lf_ratio=1, hf_ratio=1, attack=0, vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
+	detune=0, lf_ratio=1, hf_ratio=1, attack=0, vowel1_f1=0, vowel1_f2=0, vowel2_f1=0, vowel2_f2=0,
 	gate=0, out=0;
 
-	var vibrato_lfo, src, noise_src, sig_f1, sig_f2, sig_h, sig_l, sig;
+	var detune_freq, vibrato_lfo, src, noise_src, sig_f1, sig_f2, sig_h, sig_l, sig;
 	var vibrato_noise = LFNoise1.kr(10);
 	var noise_env, env;
 	var vowel_trans = Rand.new(0.1, 0.2);
@@ -27,14 +27,15 @@ SynthDef(\vsynth, {
 
 	// vibrato
 	vibrato_lfo = ((freq.cpsmidi+tune)+(vibrato*SinOsc.kr(6+(1.0*vibrato_noise),0,0.5))).midicps;
-	src = (Pulse.ar(vibrato_lfo, mul: osc1_amp*0.5) + Saw.ar(vibrato_lfo, mul: osc2_amp*0.5));
+	detune_freq = (freq.cpsmidi+detune).midicps;
+	src = (Saw.ar(vibrato_lfo, mul: osc1_amp*0.5) + Saw.ar(vibrato_lfo+detune_freq, mul: osc2_amp*0.5));
 
 	// add noise
 	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 10);
 
 	// formant settings
-	sig_f1 = BPF.ar(src+noise_src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.1, 1);
-	sig_f2 = BPF.ar(src+noise_src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.1, 1.5);
+	sig_f1 = BPF.ar(src+noise_src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.15, 1);
+	sig_f2 = BPF.ar(src+noise_src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.2);
 
 	// signal combination
 	sig = sig_f1 + sig_f2;
@@ -45,7 +46,7 @@ SynthDef(\vsynth, {
 	sig = sig_l + sig_h;
 
 	// LPF (brightness control)
-	sig = LPF.ar(sig, (brightness*10000)+3000);
+	sig = LPF.ar(sig, (brightness*10000)+5000);
 
 	env = EnvGen.kr(
 		Env.adsr(attack, 0.05, 0.8, Rand.new(0.1, 0.3)),
@@ -69,8 +70,8 @@ SynthDef(\vsynth, {
 ~velocity = 0;
 
 // Oscillators
-~osc1_val = 0;
-~osc2_val = 1;
+~osc1_val = 0.8;
+~osc2_val = 0.2;
 
 // Parameters
 // Emotion-driven parameters
@@ -81,6 +82,7 @@ SynthDef(\vsynth, {
 ~attack_val = 0;
 ~lf_ratio_val = 1;
 ~hf_ratio_val = 1;
+~detune_val = 0;
 // Directly controlled parameters
 ~tune_val = 0;
 ~vibrato_val = 0;
@@ -105,6 +107,7 @@ OSCdef.new(\note_on, {
 		\amp, ~velocity.linexp(0.0, 1.0, 0.05, 1), // volume control
 		\gate, 1,
 		\out, 0,
+		\detune, ~detune_val,
 		\attack, ~attack_val,
 		\lf_ratio, ~lf_ratio_val,
 		\hf_ratio, ~hf_ratio_val,
@@ -180,6 +183,11 @@ OSCdef.new(\hf_ratio, {
 	arg msg, time, addr, port;
 	~hf_ratio_val = msg[1].asFloat;
 }, '/vsynth/feature/hf_ratio');
+
+OSCdef.new(\detune, {
+	arg msg, time, addr, port;
+	~detune_val = msg[1].asFloat;
+}, '/vsynth/feature/detune');
 
 // Directly controlled parameters
 
