@@ -33,12 +33,8 @@ SynthDef(\vsynth, {
 	// add noise
 	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 10);
 
-	// formant settings
-	sig_f1 = BPF.ar(src+noise_src, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.15, 1);
-	sig_f2 = BPF.ar(src+noise_src, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.2);
-
-	// signal combination
-	sig = sig_f1 + sig_f2;
+	// source signal
+	sig = noise_src + src;
 
 	// HF-LF control
 	sig_l = BPF.ar(sig, 800, rq: 1.0, mul: lf_ratio);
@@ -47,6 +43,11 @@ SynthDef(\vsynth, {
 
 	// LPF (brightness control)
 	sig = LPF.ar(sig, (brightness*10000)+5000);
+
+	// formant settings
+	sig_f1 = BPF.ar(sig, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.15, 1);
+	sig_f2 = BPF.ar(sig, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.2);
+	sig = sig_f1 + sig_f2;
 
 	env = EnvGen.kr(
 		Env.adsr(attack, 0.05, 0.8, Rand.new(0.1, 0.3)),
