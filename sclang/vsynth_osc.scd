@@ -45,8 +45,8 @@ SynthDef(\vsynth, {
 	sig = LPF.ar(sig, (brightness*10000)+5000);
 
 	// formant settings
-	sig_f1 = BPF.ar(sig, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.15, 1);
-	sig_f2 = BPF.ar(sig, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.2);
+	sig_f1 = BPF.ar(sig, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.1, 1.0);
+	sig_f2 = BPF.ar(sig, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.5);
 	sig = sig_f1 + sig_f2;
 
 	env = EnvGen.kr(
