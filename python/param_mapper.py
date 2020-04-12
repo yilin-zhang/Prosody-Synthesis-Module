@@ -108,8 +108,8 @@ class ParamMapper():
         '''Get the formant frequencies based on the current param_values'''
         formant_control_params = {
             'a': {
-                'f1': 850,  # in Hz
-                'f2': 1610,
+                'f1': 660,  # in Hz
+                'f2': 1700,
                 'f1_range': 75,  # in Hz
                 'f2_range': 150,
                 'f1_valence_ratio': 0.3,
@@ -118,8 +118,8 @@ class ParamMapper():
                 'f2_power_ratio': 0.1,
             },
             'i': {
-                'f1': 240,
-                'f2': 2400,
+                'f1': 270,
+                'f2': 2300,
                 'f1_range': 120,
                 'f2_range': 150,
                 'f1_valence_ratio': -0.3,
@@ -128,8 +128,8 @@ class ParamMapper():
                 'f2_power_ratio': 0.3,
             },
             'u': {
-                'f1': 250,
-                'f2': 595,
+                'f1': 300,
+                'f2': 870,
                 'f1_range': 90,
                 'f2_range': 70,
                 'f1_valence_ratio': 0.4,
