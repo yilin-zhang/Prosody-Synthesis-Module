@@ -61,6 +61,13 @@ def get_handlers(param_mapper):
     return note_on_handler, note_off_handler, cc_handler
 
 
+def send_file(path, midi_osc_converter):
+    ''' Convert MIDI messages in a MIDI file to osc messages and send'''
+    mid = mido.MidiFile(path)
+    for msg in mid:
+        midi_osc_converter.send_osc(msg)
+
+
 def watch_dir(dir_path, midi_osc_converter):
     ''' Watches a directory, and send midi messages whenever a new MIDI file
     is created in it.
@@ -76,9 +83,7 @@ def watch_dir(dir_path, midi_osc_converter):
             if status.name == 'added' and path.endswith('.mid'):
                 print('new midi message')
                 # sock.sendto(bytes('h', 'utf-8'), ('192.168.1.5', 4210))
-                mid = mido.MidiFile(path)
-                for msg in mid:
-                    midi_osc_converter.send_osc(msg)
+                send_file(path, midi_osc_converter)
 
 
 def realtime_input(midi_osc_converter):
@@ -96,5 +101,8 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         realtime_input(midi_osc_converter)
     else:
-        dir_path = sys.argv[1]
-        watch_dir(dir_path, midi_osc_converter)
+        path = sys.argv[1]
+        if os.path.isfile(path):
+            send_file(path, midi_osc_converter)
+        else:
+            watch_dir(path, midi_osc_converter)
