@@ -54,9 +54,9 @@ SynthDef(\vsynth, {
 		doneAction:2
 	);
 
-	sig = env * sig * amp * 8;
+	sig = env * sig * amp * 15;
 
-	Out.ar(out, Limiter.ar(sig.dup, 0.3));
+	Out.ar(out, Limiter.ar(sig.dup, 0.95));
 
 }).add;
 
