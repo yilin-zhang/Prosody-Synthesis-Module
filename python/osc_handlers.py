@@ -69,15 +69,16 @@ class MidiOscConverter():
         self._cc_handler = cc_handler
 
     def send_osc(self, midi_message):
-        if midi_message.type == 'note_on':
+        time.sleep(midi_message.time)
+        if midi_message.type == 'note_off' or (midi_message.type == 'note_on' and
+                                               midi_message.velocity == 0):
+            note = midi_message.note
+            self._note_off_handler(note, self._osc_sender)
+        elif midi_message.type == 'note_on':
             note = midi_message.note
             velocity = midi_message.velocity
             self._note_on_handler(note, velocity, self._osc_sender)
-        elif midi_message.type == 'note_off':
-            note = midi_message.note
-            self._note_off_handler(note, self._osc_sender)
         elif (self._cc_handler and midi_message.type == 'control_change'):
             control_num = midi_message.control
             control_val = midi_message.value
             self._cc_handler(control_num, control_val, self._osc_sender)
-        time.sleep(midi_message.time)
