@@ -138,14 +138,14 @@ OSCdef.new(\vco_1, {
 	var val = msg[1].asFloat;
 	~osc1_val = val;
 	~notes.do {|note| note.set(\osc1_amp, ~osc1_val)};
-}, 'vsynth/vco/1');
+}, '/vsynth/vco/1');
 
 OSCdef.new(\vco_2, {
 	arg msg, time, addr, port;
 	var val = msg[1].asFloat;
 	~osc2_val = val;
 	~notes.do {|note| note.set(\osc2_amp, ~osc2_val)};
-}, 'vsynth/vco/2');
+}, '/vsynth/vco/2');
 
 // Emotion driven parameters
 
