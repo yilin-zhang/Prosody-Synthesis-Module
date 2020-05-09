@@ -20,8 +20,8 @@ SynthDef(\vsynth, {
 
 	// vibrato
 	vibrato_lfo = ((freq.cpsmidi+tune)+(vibrato*SinOsc.kr(6+(1.0*vibrato_noise),0,0.5))).midicps;
-	detune_freq = (vibrato_lfo.cpsmidi + detune).midicps;
-	src = (Saw.ar(vibrato_lfo, mul: osc1_amp*0.5) + Saw.ar(detune_freq, mul: osc2_amp*0.5));
+	detune_freq = (vibrato_lfo.cpsmidi+detune).midicps;
+	src = (Saw.ar(vibrato_lfo, mul: osc1_amp) + Saw.ar(detune_freq, mul: osc2_amp));
 
 	// add noise
 	noise_src = LPF.ar(PinkNoise.ar(0.05) * noisiness, brightness*1000+500, 10);
@@ -30,21 +30,21 @@ SynthDef(\vsynth, {
 	sig = noise_src + src;
 
 	// HF-LF control
-	sig_l = BPF.ar(sig, 800, rq: 1.0, mul: lf_ratio);
-	sig_h = BPF.ar(sig, 4000, rq: 1.0, mul: hf_ratio);
+	sig_l = LPF.ar(sig, 3000, rq: 1.0, mul: lf_ratio);
+	sig_h = HPF.ar(sig, 3000, rq: 1.0, mul: hf_ratio);
 	sig = sig_l + sig_h;
 
 	// LPF (brightness control)
 	sig = LPF.ar(sig, (brightness*10000)+5000);
 
 	// formant settings
-	sig_f1 = BPF.ar(sig, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.8, 1.0);
+	sig_f1 = BPF.ar(sig, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.8, 0.9);
 	sig_f1 = BPF.ar(sig_f1, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.1, 0.9);
 	//sig_f1 = BPF.ar(sig_f1, XLine.kr(vowel1_f1, vowel2_f1, attack+vowel_trans), 0.1, 1.2);
 
 	sig_f2 = BPF.ar(sig, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.5, 1.3);
 	sig_f2 = BPF.ar(sig_f2, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.3, 1.3);
-	sig_f2 = BPF.ar(sig_f2, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.15, 1.0);
+	sig_f2 = BPF.ar(sig_f2, XLine.kr(vowel1_f2, vowel2_f2, attack+vowel_trans), 0.15, 1.3);
 
 	sig = sig_f1 + sig_f2;
 
@@ -54,7 +54,7 @@ SynthDef(\vsynth, {
 		doneAction:2
 	);
 
-	sig = env * sig * amp * 15;
+	sig = env * sig * amp * 3;
 
 	Out.ar(out, Limiter.ar(sig.dup, 0.95));
 

@@ -73,7 +73,7 @@ class ParamMapper():
         return {'lf_ratio': lf_ratio, 'hf_ratio': hf_ratio}
 
     def _map_detune(self):
-        detune_range = (0, -1)
+        detune_range = (0, -0.5)
         valence = self._param_values['valence']
         power = self._param_values['power']
 
