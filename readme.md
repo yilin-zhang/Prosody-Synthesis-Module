@@ -23,7 +23,7 @@ Make sure you have Python and SuperCollider installed.
 
 In `python/` directory, run the following command to install Python dependencies:
 ``` shell
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 Most of the time, you need a configuration file to make it work properly. To do
@@ -57,8 +57,8 @@ Run `sclang/vsynth_gui.scd` on SuperCollider. You can run this either on
 SuperCollider IDE or through command line. For command line, make sure you are
 at the project root directory, and use the following command:
 
-```
-/path/to/sclang sclang/vsynth_gui.scd
+``` shell
+$ /path/to/sclang sclang/vsynth_gui.scd
 ```
 
 Also run `python/gui_to_sclang` to enable the OSC transmit.
@@ -85,8 +85,8 @@ Run `sclang/vsynth_osc.scd` on SuperCollider. You can run this either on
 SuperCollider IDE or through command line. For command line, make sure you are
 at the project root directory, and use the following command:
 
-```
-/path/to/sclang sclang/vsynth_osc.scd
+``` shell
+$ /path/to/sclang sclang/vsynth_osc.scd
 ```
 
 Once you start running the code, there's one line in the output that tells you
