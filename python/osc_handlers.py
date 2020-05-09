@@ -43,7 +43,8 @@ class OscTransmitter():
         - func: a function: (address, message, client)
         '''
         def callback(addr, message):
-            addr = '/' + '/'.join(addr.split('/')[2:])  # remove the root
+            if self._receive_root != '':
+                addr = '/' + '/'.join(addr.split('/')[2:])  # remove the root
             func(addr, message, self._osc_sender)
 
         self._dispatcher.map(self._receive_root + address, callback)
@@ -59,9 +60,9 @@ class MidiOscConverter():
     def __init__(self,
                  send_ip,
                  send_port,
-                 note_on_handler=False,
-                 note_off_handler=False,
-                 cc_handler=False,
+                 note_on_handler,
+                 note_off_handler,
+                 cc_handler,
                  root_address='/vsynth'):
         self._osc_sender = OscSender(send_ip, send_port, root_address)
         self._note_on_handler = note_on_handler

@@ -102,6 +102,7 @@ OSCdef.new(\note_on, {
 	arg msg, time, addr, port;
 	var val = msg[1].asInt;
 	val.postln;
+	~notes[val].set(\gate, 0);
 	~notes[val] = Synth.new(\vsynth, [
 		\freq, val.midicps,
 		\amp, ~velocity.linexp(0.0, 1.0, 0.05, 1), // volume control

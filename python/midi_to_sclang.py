@@ -94,8 +94,8 @@ def realtime_input(midi_osc_converter):
 
 
 if __name__ == '__main__':
-    param_mapper = ParamMapper()
-    note_on_handler, note_off_handler, cc_handler = get_handlers(param_mapper)
+    mapper = ParamMapper()
+    note_on_handler, note_off_handler, cc_handler = get_handlers(mapper)
     midi_osc_converter = MidiOscConverter(SC_IP, SC_PORT, note_on_handler,
                                           note_off_handler, cc_handler)
     if len(sys.argv) < 2:
