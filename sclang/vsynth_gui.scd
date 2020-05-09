@@ -1,15 +1,15 @@
 // Color palette: https://www.color-hex.com/color-palette/91866
 
-var emotionPanel, paramKnobs, keyButtons, volumeSlider;
+var emotionPanel, paramKnobs, keyButtons, velocitySlider;
 var mainLayout, upperLayout;
-var panelLayout, knobsLayout, knobLayouts, keyboardLayout, volumeLayout;
-var panelText, vcoText, knobTexts, volumeText;
+var panelLayout, knobsLayout, knobLayouts, keyboardLayout, velocityLayout;
+var panelText, vcoText, knobTexts, velocityText;
 var oscAddr;
 
 var velocity=1.0;
 
 Window.closeAll;
-w = Window.new("VSynth", Rect(500, 200, 380, 250))
+w = Window.new("Prosody Synthesis Control Panel", Rect(500, 200, 380, 250))
 .background_(Color.fromHexString("#e9dbd5"));
 oscAddr = NetAddr.new("127.0.0.1", 8088);
 
@@ -26,11 +26,11 @@ panelText = StaticText.new().string_("Valence × Power");
 panelLayout = VLayout.new([panelText, align: \center], emotionPanel);
 
 ///////////////////////////////////////////////////////////////////
-// Volume Slider
-volumeSlider = Slider.new()
+// Velocity Slider
+velocitySlider = Slider.new()
 .background_(Color.fromHexString("#a68886")).value_(1.0);
-volumeText = StaticText.new().string_("Velocity");
-volumeLayout = VLayout.new([volumeText, align: \center], volumeSlider);
+velocityText = StaticText.new().string_("Velocity");
+velocityLayout = VLayout.new([velocityText, align: \center], velocitySlider);
 
 ///////////////////////////////////////////////////////////////////
 // Parameter Knobs
@@ -83,7 +83,7 @@ keyButtons = 12.collect { |i|
 	.minSize_(Size(20, 40))
 	.states_([[i, Color.white, Color.fromHexString(btnColor)]])
 	.mouseDownAction_({|button|
-		oscAddr.sendMsg("/gui/note/velocity", volumeSlider.value);
+		oscAddr.sendMsg("/gui/note/velocity", velocitySlider.value);
 		oscAddr.sendMsg("/gui/note/note_on", 60+i);
 	})
 	.action_({|button|
@@ -96,7 +96,7 @@ keyboardLayout = HLayout.new(*keyButtons);
 // Main Layout
 upperLayout = HLayout.new(
 	[panelLayout, stretch: 2],
-	[volumeLayout],
+	[velocityLayout],
 	[knobsLayout, stretch: 1.5]
 );
 mainLayout = VLayout.new(upperLayout, keyboardLayout);
