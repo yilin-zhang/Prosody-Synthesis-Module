@@ -46,7 +46,7 @@ if __name__ == '__main__':
     param_handler, velocity_handler, note_on_handler, note_off_handler = get_handlers(mapper)
 
     osc_trans = OscTransmitter(OSC_BRIDGE_IP, OSC_BRIDGE_PORT, SC_IP, SC_PORT,
-                               '/web', '/vsynth')
+                               '/gui', '/vsynth')
 
     osc_trans.map("/note/velocity", velocity_handler)
     osc_trans.map("/note/note_on", note_on_handler)

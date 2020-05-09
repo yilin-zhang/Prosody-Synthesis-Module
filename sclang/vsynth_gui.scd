@@ -19,8 +19,8 @@ emotionPanel = Slider2D.new()
 .background_(Color.fromHexString("#c0a5a1"))
 .x_(0.5).y_(0.5)
 .action_({|panel|
-	oscAddr.sendMsg("/web/emotion/valence", panel.x.linlin(0.0, 1.0, -1.0, 1.0));
-	oscAddr.sendMsg("/web/emotion/power", panel.y.linlin(0.0, 1.0, -1.0, 1.0));
+	oscAddr.sendMsg("/gui/emotion/valence", panel.x.linlin(0.0, 1.0, -1.0, 1.0));
+	oscAddr.sendMsg("/gui/emotion/power", panel.y.linlin(0.0, 1.0, -1.0, 1.0));
 });
 panelText = StaticText.new().string_("Valence × Power");
 panelLayout = VLayout.new([panelText, align: \center], emotionPanel);
@@ -42,21 +42,21 @@ paramKnobs = 4.collect {
 paramKnobs[0]
 .value_(0.5)               // Tune in the middle
 .action_({|knob|
-	oscAddr.sendMsg("/web/feature/tune", knob.value.linlin(0.0, 1.0, -1.0, 1.0));
+	oscAddr.sendMsg("/gui/feature/tune", knob.value.linlin(0.0, 1.0, -1.0, 1.0));
 });
 paramKnobs[1]
 .value_(0.3)  // Vibrato 0.3
 .action_({|knob|
-	oscAddr.sendMsg("/web/feature/vibrato", knob.value);
+	oscAddr.sendMsg("/gui/feature/vibrato", knob.value);
 });
 paramKnobs[2]
 .value_(1)    // Brightness 1.0
 .action_({|knob|
-	oscAddr.sendMsg("/web/feature/brightness", knob.value);
+	oscAddr.sendMsg("/gui/feature/brightness", knob.value);
 });
 paramKnobs[3]
 .action_({|knob|
-	oscAddr.sendMsg("/web/feature/noisiness", knob.value);
+	oscAddr.sendMsg("/gui/feature/noisiness", knob.value);
 });
 knobTexts = Array.new(4);
 knobTexts.add(StaticText.new().string_("Tune"));
@@ -83,11 +83,11 @@ keyButtons = 12.collect { |i|
 	.minSize_(Size(20, 40))
 	.states_([[i, Color.white, Color.fromHexString(btnColor)]])
 	.mouseDownAction_({|button|
-		oscAddr.sendMsg("/web/note/velocity", volumeSlider.value);
-		oscAddr.sendMsg("/web/note/note_on", 60+i);
+		oscAddr.sendMsg("/gui/note/velocity", volumeSlider.value);
+		oscAddr.sendMsg("/gui/note/note_on", 60+i);
 	})
 	.action_({|button|
-		oscAddr.sendMsg("/web/note/note_off", 60+i);
+		oscAddr.sendMsg("/gui/note/note_off", 60+i);
 	});
 };
 keyboardLayout = HLayout.new(*keyButtons);
