@@ -75,9 +75,9 @@ knobsLayout = VLayout.new(*knobLayouts);
 // Keyboard
 keyButtons = 12.collect { |i|
 	var btnColor;
-	if ([0, 2, 4, 5, 7, 9, 10].includes(i),
-		{ btnColor = "#6b554d" },
-		{ btnColor = "#c0a5a1" }
+	if ([0, 2, 4, 5, 7, 9, 11].includes(i),
+		{ btnColor = "#c0a5a1" },
+		{ btnColor = "#6b554d" }
 	);
 	Button.new()
 	.minSize_(Size(20, 40))
