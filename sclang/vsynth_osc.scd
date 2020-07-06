@@ -30,8 +30,8 @@ SynthDef(\vsynth, {
 	sig = noise_src + src;
 
 	// HF-LF control
-	sig_l = LPF.ar(sig, 3000, rq: 1.0, mul: lf_ratio);
-	sig_h = HPF.ar(sig, 3000, rq: 1.0, mul: hf_ratio);
+	sig_l = LPF.ar(sig, 3000, mul: lf_ratio);
+	sig_h = HPF.ar(sig, 3000, mul: hf_ratio);
 	sig = sig_l + sig_h;
 
 	// LPF (brightness control)
